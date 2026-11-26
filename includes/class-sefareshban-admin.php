@@ -168,7 +168,8 @@ class Sefareshban_Admin {
 			if ( in_array( $action, array( 'edit', 'new', 'trash', 'untrash', 'delete', 'view' ), true ) ) {
 				return;
 			}
-			if ( isset( $_GET['id'] ) && '' !== $action ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Any single-order operation on wc-orders should pass through.
+			if ( isset( $_GET['id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
 			wp_safe_redirect( admin_url( 'admin.php?page=sefareshban-orders' ) );

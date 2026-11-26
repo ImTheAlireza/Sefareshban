@@ -21,7 +21,7 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
 
     <div class="nav-label">منوی اصلی</div>
     <nav class="nav" aria-label="ناوبری اصلی">
-      <a href="#" data-nav>
+      <a href="<?php echo esc_url( admin_url('index.php') ); ?>" data-nav="dashboard">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/></svg>
         <span>داشبورد</span>
       </a>
@@ -30,25 +30,25 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
         <span>سفارش‌ها</span>
         <span class="count">۱۴</span>
       </a>
-      <a href="#" data-nav>
+      <a href="<?php echo esc_url( admin_url('edit.php?post_type=product') ); ?>" data-nav="products">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3.3 8.3L12 13l8.7-4.7M12 21v-8"/></svg>
         <span>محصولات</span>
       </a>
-      <a href="#" data-nav>
+      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-admin&path=/customers') ); ?>" data-nav="customers">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3.2 3.2 0 010 6"/></svg>
         <span>مشتریان</span>
       </a>
-      <a href="#" data-nav>
+      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-admin&path=/analytics/overview') ); ?>" data-nav="reports">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-6M22 19H2"/></svg>
         <span>گزارش‌ها</span>
       </a>
 
       <div class="nav-label">سایر</div>
-      <a href="#" data-nav>
+      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-settings') ); ?>" data-nav="settings">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9 2 2 0 11-2.8 2.8 1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5 2 2 0 11-4 0 1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3 2 2 0 11-2.8-2.8 1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1 2 2 0 110-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9 2 2 0 112.8-2.8 1.7 1.7 0 001.9.3 1.7 1.7 0 001-1.5 2 2 0 114 0 1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3 2 2 0 112.8 2.8 1.7 1.7 0 00-.3 1.9 1.7 1.7 0 001.5 1 2 2 0 110 4 1.7 1.7 0 00-1.5 1z"/></svg>
         <span>تنظیمات</span>
       </a>
-      <a href="#" data-nav>
+      <a href="https://woocommerce.com/documentation/" target="_blank" rel="noopener" data-nav="support">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-.9.7-1.5 1.2-1.5 2.3"/><path d="M12 17h.01"/></svg>
         <span>پشتیبانی</span>
       </a>

@@ -676,9 +676,8 @@ function renderKpiCharts(){
     {t:'شنبه', v:12400000}, {t:'یکشنبه', v:14800000}, {t:'دوشنبه', v:13100000},
     {t:'سه‌شنبه', v:16900000}, {t:'چهارشنبه', v:15200000}, {t:'پنج‌شنبه', v:17100000}, {t:'امروز', v:18450000}
   ];
-  drawAreaChart($('#chartSales'), salesData, {
-    label:'نمودار روند فروش ۷ روز اخیر',
-    showAvg: true,
+  drawBarChart($('#chartSales'), salesData, {
+    label:'نمودار ستونی فروش ۷ روز اخیر',
     fmt: v => `${fa(Math.round(v))} تومان`
   });
 
@@ -697,9 +696,8 @@ function renderKpiCharts(){
     {t:'۲۰ آبان', v:1340000}, {t:'۲۵ آبان', v:1280000}, {t:'۳۰ آبان', v:1265000},
     {t:'۲ آذر', v:1255000}, {t:'امروز', v:1230000}
   ];
-  drawAreaChart($('#chartAov'), aovData, {
-    label:'نمودار روند ۳۰ روزه میانگین ارزش سفارش',
-    showPeak: true,
+  drawBarChart($('#chartAov'), aovData, {
+    label:'نمودار ستونی میانگین ارزش سفارش ۳۰ روزه',
     fmt: v => `${fa(Math.round(v))} تومان`
   });
 }
@@ -840,7 +838,10 @@ function renderKpiCharts(){
   const expandBtn = $('#expandBtn');
   if (expandBtn) expandBtn.addEventListener('click', () => { fetchOrders(); fetchStats(); toast(i18n.refresh || 'به‌روز شد'); });
 
-  $$('[data-nav]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); toast('این بخش در نسخه افزونه اضافه می‌شود'); }));
+  $$('[data-nav]').forEach(a => a.addEventListener('click', e => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href === '#') { e.preventDefault(); toast('این بخش در نسخه افزونه اضافه می‌شود'); }
+  }));
   const promoBtn = document.querySelector('.promo button');
   if (promoBtn) promoBtn.addEventListener('click', () => {
     state.status = 'pending'; state.page = 1; state.selected.clear();

@@ -4,11 +4,11 @@
 #wpbody-content{padding-bottom:0 !important}
 #wpfooter{display:none !important}
 .update-nag,.notice,.error,.updated{display:none !important}
-.sefareshban-wrap{margin:0 !important}
+.sefareshban-wrap{margin:0 !important;height:calc(100vh - var(--wp-admin--admin-bar--height,32px));overflow:hidden}
 .sefareshban-root{
   --sb-font:'Vazirmatn','Segoe UI',Tahoma,system-ui,sans-serif;
   font-family:var(--sb-font);
-  padding:16px;
+  padding:12px;
   background:var(--page);
   color:var(--ink);
   font-size:14px;
@@ -16,11 +16,15 @@
   -webkit-font-smoothing:antialiased;
   direction:rtl;
   box-sizing:border-box;
+  height:100%;
+  overflow:hidden;
 }
 .sefareshban-root *, .sefareshban-root *::before, .sefareshban-root *::after{box-sizing:border-box}
-.sefareshban-root .app{height:calc(100vh - 32px - 32px);}
+.sefareshban-root .app{height:100% !important;min-height:0;}
 @media (max-width:782px){
-  .sefareshban-root .app{height:auto;min-height:calc(100vh - 120px)}
+  .sefareshban-wrap{height:auto;overflow:visible}
+  .sefareshban-root{height:auto;overflow:visible;padding:8px}
+  .sefareshban-root .app{height:auto !important;min-height:calc(100vh - 120px)}
   .auto-fold #wpcontent{padding-left:0 !important;padding-right:0 !important}
 }
 
@@ -471,8 +475,9 @@ svg{display:block;flex:none}
   border-radius:var(--r-card);
   box-shadow:var(--shadow-card);
   overflow:hidden;
+  width:100%;
 }
-.table-scroll{overflow-x:auto}
+.table-scroll{overflow-x:auto;width:100%}
 .table-scroll::-webkit-scrollbar{height:8px}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
 table{width:100%;border-collapse:separate;border-spacing:0;min-width:920px}

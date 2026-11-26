@@ -344,10 +344,17 @@ function sfog_fix_broken_emails() {
 	$orders = wc_get_orders( array(
 		'limit'  => -1,
 		'return' => 'objects',
+		'type'   => 'shop_order',
 		'status' => array_keys( wc_get_order_statuses() ),
 	) );
 	$fixed = 0;
 	foreach ( $orders as $order ) {
+		if ( ! $order || ! is_a( $order, 'WC_Order' ) || is_a( $order, 'WC_Order_Refund' ) ) {
+			continue;
+		}
+		if ( ! method_exists( $order, 'get_billing_email' ) || ! method_exists( $order, 'set_billing_email' ) ) {
+			continue;
+		}
 		$email = (string) $order->get_billing_email();
 		if ( ! sfog_is_broken_fake_email( $email ) ) {
 			continue;

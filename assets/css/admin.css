@@ -1,9 +1,14 @@
 
 /* WP admin overrides for Sefareshban page */
-#wpcontent{padding-left:0 !important;padding-right:0 !important}
-#wpbody-content{padding-bottom:0 !important}
-#wpfooter{display:none !important}
-.update-nag,.notice,.error,.updated{display:none !important}
+body.sefareshban-admin-page #wpcontent{padding-left:0 !important;padding-right:0 !important}
+body.sefareshban-admin-page #wpbody-content{padding-bottom:0 !important;overflow:hidden !important}
+body.sefareshban-admin-page #wpbody{overflow:hidden !important}
+body.sefareshban-admin-page #wpfooter{display:none !important}
+body.sefareshban-admin-page .update-nag,
+body.sefareshban-admin-page .notice,
+body.sefareshban-admin-page .error,
+body.sefareshban-admin-page .updated{display:none !important}
+body.sefareshban-admin-page #wpwrap{overflow:hidden}
 .sefareshban-wrap{margin:0 !important;height:calc(100vh - var(--wp-admin--admin-bar--height,32px));overflow:hidden}
 .sefareshban-root{
   --sb-font:'Vazirmatn','Segoe UI',Tahoma,system-ui,sans-serif;
@@ -221,7 +226,7 @@ svg{display:block;flex:none}
 .content::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;border:3px solid var(--surface-2)}
 .content::-webkit-scrollbar-thumb:hover{background:var(--muted-2)}
 .content::-webkit-scrollbar-track{background:transparent}
-.wrap{max-width:100%;margin:0 auto;width:100%}
+.wrap{max-width:100% !important;margin:0 !important;width:100% !important}
 
 /* page head */
 .pagehead{display:flex;align-items:flex-start;gap:16px;margin-bottom:12px}
@@ -475,12 +480,14 @@ svg{display:block;flex:none}
   border-radius:var(--r-card);
   box-shadow:var(--shadow-card);
   overflow:hidden;
-  width:100%;
+  width:100% !important;
+  max-width:100% !important;
+  display:block;
 }
-.table-scroll{overflow-x:auto;width:100%}
+.table-scroll{overflow-x:auto;width:100% !important;max-width:100% !important;display:block}
 .table-scroll::-webkit-scrollbar{height:8px}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
-table{width:100%;border-collapse:separate;border-spacing:0;min-width:920px}
+table{width:100%;min-width:100%;border-collapse:separate;border-spacing:0;table-layout:auto}
 th{
   position:sticky;top:0;z-index:2;
   background:var(--surface);
@@ -787,3 +794,11 @@ tr:hover .dots{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
+
+/* ===== App sections (in-plugin navigation) ===== */
+.app-section{display:none}
+.app-section.active{display:block}
+.app-section .card table{min-width:100%;width:100%}
+.app-section .pagehead{margin-bottom:12px}
+#section-reports .kpis .kpi-chart{display:none}
+#section-reports .kpis .kpi-main{margin-top:8px}

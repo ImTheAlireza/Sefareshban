@@ -200,7 +200,7 @@
       state.loading = false;
       renderChips();
       renderTable();
-      const navCount = document.querySelector('.nav a[aria-current="page"] .count');
+      const navCount = document.getElementById('navOrdersCount');
       if (navCount) navCount.textContent = fa(state.statusCounts.all || state.total || 0);
     }
   }
@@ -720,7 +720,7 @@ function renderKpiCharts(){
   fetchStats();
   fetchOrders().then(() => {
     // update sidebar count
-    const navCount = document.querySelector('.nav a[aria-current="page"] .count');
+    const navCount = document.getElementById('navOrdersCount');
     if (navCount) navCount.textContent = fa(state.statusCounts.all || state.total || 0);
   });
 
@@ -838,12 +838,78 @@ function renderKpiCharts(){
   const expandBtn = $('#expandBtn');
   if (expandBtn) expandBtn.addEventListener('click', () => { fetchOrders(); fetchStats(); toast(i18n.refresh || 'به‌روز شد'); });
 
-  $$('[data-nav]').forEach(a => a.addEventListener('click', e => {
-    const href = a.getAttribute('href') || '';
-    if (!href || href === '#') { e.preventDefault(); toast('این بخش در نسخه افزونه اضافه می‌شود'); }
+  // Section switching (in-plugin navigation)
+  let customersLoaded = false, productsLoaded = false;
+  function switchSection(name) {
+    $$('.app-section').forEach(s => s.classList.toggle('active', s.id === 'section-' + name));
+    $$('[data-section]').forEach(a => {
+      const active = a.dataset.section === name;
+      if (active) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    const titles = {orders:'سفارش‌ها', customers:'مشتریان', products:'محصولات', reports:'گزارش‌ها', settings:'تنظیمات'};
+    const crumb = document.querySelector('.crumbs .crumb-text');
+    if (crumb) crumb.textContent = titles[name] || 'سفارش‌بان';
+    if (name === 'customers' && !customersLoaded) loadCustomers();
+    if (name === 'products' && !productsLoaded) loadProducts();
+    if (name === 'reports') loadReports();
+  }
+  $$('[data-section]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    switchSection(a.dataset.section);
   }));
+
+  async function loadCustomers() {
+    const body = $('#customersBody');
+    if (body) body.innerHTML = '<tr><td colspan="6" class="muted" style="padding:20px">در حال بارگذاری…</td></tr>';
+    try {
+      const data = await api('sefareshban_get_customers', {});
+      customersLoaded = true;
+      const rows = data.rows || [];
+      if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="muted" style="padding:20px">مشتری‌ای یافت نشد.</td></tr>'; return; }
+      body.innerHTML = rows.map(c => `
+        <tr>
+          <td><div class="cust"><b>${esc(c.name||'—')}</b><span>${esc(c.city||'')}</span></div></td>
+          <td class="muted">${esc(c.email||'—')}</td>
+          <td class="muted num">${esc(c.phone||'—')}</td>
+          <td class="muted">${esc(c.city||'—')}</td>
+          <td class="num">${fa(c.orders||0)}</td>
+          <td class="num" style="font-weight:600">${fa(Math.round(c.total||0))} <small style="color:var(--muted);font-weight:400">${esc(i18n.toman||'تومان')}</small></td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); if (body) body.innerHTML = '<tr><td colspan="6" style="padding:20px;color:var(--danger)">خطا در دریافت مشتریان</td></tr>'; }
+  }
+
+  async function loadProducts() {
+    const body = $('#productsBody');
+    if (body) body.innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">در حال بارگذاری…</td></tr>';
+    try {
+      const data = await api('sefareshban_get_products', {});
+      productsLoaded = true;
+      const rows = data.rows || [];
+      if (!rows.length) { body.innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">محصولی یافت نشد.</td></tr>'; return; }
+      body.innerHTML = rows.map(p => `
+        <tr>
+          <td><div class="cust"><b>${esc(p.name||'—')}</b><span>${esc(p.sku||'')}</span></div></td>
+          <td class="num" style="font-weight:600">${fa(Math.round(p.price||0))} <small style="color:var(--muted);font-weight:400">${esc(i18n.toman||'تومان')}</small></td>
+          <td class="num">${p.stock === null ? '—' : fa(p.stock)}</td>
+          <td><span class="badge" data-status="${p.status==='publish'?'completed':'onhold'}">${p.status==='publish'?'منتشر شده':'پیش‌نویس'}</span></td>
+          <td class="num">${fa(p.total_sales||0)}</td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); if (body) body.innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--danger)">خطا در دریافت محصولات</td></tr>'; }
+  }
+
+  function loadReports() {
+    const s = state.stats;
+    if (!s) { fetchStats().then(loadReports); return; }
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+    set('repTotalOrders', fa(s.statusCountsAll || state.statusCounts.all || 0) + ' <small>سفارش</small>');
+    set('repTodaySales', fa(Math.round(s.todaySales||0)) + ' <small>' + esc(i18n.toman||'تومان') + '</small>');
+    set('repPending', fa(s.pendingCount||0) + ' <small>سفارش</small>');
+    set('repAov', fa(Math.round(s.aov30||0)) + ' <small>' + esc(i18n.toman||'تومان') + '</small>');
+  }
   const promoBtn = document.querySelector('.promo button');
   if (promoBtn) promoBtn.addEventListener('click', () => {
+    switchSection('orders');
     state.status = 'pending'; state.page = 1; state.selected.clear();
     renderChips(); fetchOrders();
     document.querySelector('.content')?.scrollTo({top:0, behavior:'smooth'});

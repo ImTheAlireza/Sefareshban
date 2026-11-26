@@ -21,36 +21,28 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
 
     <div class="nav-label">منوی اصلی</div>
     <nav class="nav" aria-label="ناوبری اصلی">
-      <a href="<?php echo esc_url( admin_url('index.php') ); ?>" data-nav="dashboard">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/></svg>
-        <span>داشبورد</span>
-      </a>
-      <a href="#" aria-current="page">
+      <a href="#" data-section="orders" aria-current="page">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h4"/></svg>
         <span>سفارش‌ها</span>
-        <span class="count">۱۴</span>
+        <span class="count" id="navOrdersCount">۱۴</span>
       </a>
-      <a href="<?php echo esc_url( admin_url('edit.php?post_type=product') ); ?>" data-nav="products">
+      <a href="#" data-section="products">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3.3 8.3L12 13l8.7-4.7M12 21v-8"/></svg>
         <span>محصولات</span>
       </a>
-      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-admin&path=/customers') ); ?>" data-nav="customers">
+      <a href="#" data-section="customers">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3.2 3.2 0 010 6"/></svg>
         <span>مشتریان</span>
       </a>
-      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-admin&path=/analytics/overview') ); ?>" data-nav="reports">
+      <a href="#" data-section="reports">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-6M22 19H2"/></svg>
         <span>گزارش‌ها</span>
       </a>
 
       <div class="nav-label">سایر</div>
-      <a href="<?php echo esc_url( admin_url('admin.php?page=wc-settings') ); ?>" data-nav="settings">
+      <a href="#" data-section="settings">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9 2 2 0 11-2.8 2.8 1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5 2 2 0 11-4 0 1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3 2 2 0 11-2.8-2.8 1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1 2 2 0 110-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9 2 2 0 112.8-2.8 1.7 1.7 0 001.9.3 1.7 1.7 0 001-1.5 2 2 0 114 0 1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3 2 2 0 112.8 2.8 1.7 1.7 0 00-.3 1.9 1.7 1.7 0 001.5 1 2 2 0 110 4 1.7 1.7 0 00-1.5 1z"/></svg>
         <span>تنظیمات</span>
-      </a>
-      <a href="https://woocommerce.com/documentation/" target="_blank" rel="noopener" data-nav="support">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-.9.7-1.5 1.2-1.5 2.3"/><path d="M12 17h.01"/></svg>
-        <span>پشتیبانی</span>
       </a>
     </nav>
 
@@ -85,6 +77,7 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
     <main class="content">
       <div class="wrap">
 
+      <section id="section-orders" class="app-section active">
         <div class="pagehead">
           <div>
             <h1>سفارش‌ها</h1>
@@ -276,6 +269,56 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
             <div class="pages" id="pages"></div>
           </div>
         </section>
+
+      </section>
+
+      <section id="section-customers" class="app-section">
+        <div class="pagehead"><div><h1>مشتریان</h1><p>لیست مشتریان و اطلاعات خرید</p></div></div>
+        <section class="card">
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>مشتری</th><th>ایمیل</th><th>تلفن</th><th>شهر</th><th>تعداد سفارش</th><th>جمع خرید</th>
+              </tr></thead>
+              <tbody id="customersBody"><tr><td colspan="6" class="muted" style="padding:20px">در حال بارگذاری…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="section-products" class="app-section">
+        <div class="pagehead"><div><h1>محصولات</h1><p>محصولات فروشگاه</p></div></div>
+        <section class="card">
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>محصول</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th><th>فروش</th>
+              </tr></thead>
+              <tbody id="productsBody"><tr><td colspan="5" class="muted" style="padding:20px">در حال بارگذاری…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="section-reports" class="app-section">
+        <div class="pagehead"><div><h1>گزارش‌ها</h1><p>خلاصه عملکرد فروشگاه</p></div></div>
+        <div class="kpis" style="margin-bottom:14px" id="reportsKpis">
+          <article class="kpi" data-tone="rose"><div class="kpi-label"><span class="chip-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/></svg></span>کل سفارش‌ها</div><div class="kpi-main"><div class="kpi-metrics"><div class="kpi-value num" id="repTotalOrders">—</div></div></div></article>
+          <article class="kpi" data-tone="emerald"><div class="kpi-label"><span class="chip-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/></svg></span>فروش امروز</div><div class="kpi-main"><div class="kpi-metrics"><div class="kpi-value num" id="repTodaySales">—</div></div></div></article>
+          <article class="kpi" data-tone="amber"><div class="kpi-label"><span class="chip-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>در انتظار اقدام</div><div class="kpi-main"><div class="kpi-metrics"><div class="kpi-value num" id="repPending">—</div></div></div></article>
+          <article class="kpi" data-tone="indigo"><div class="kpi-label"><span class="chip-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 8h12l-1 12H7L6 8z"/></svg></span>میانگین ارزش سفارش</div><div class="kpi-main"><div class="kpi-metrics"><div class="kpi-value num" id="repAov">—</div></div></div></article>
+        </div>
+        <section class="card"><div style="padding:20px;color:var(--muted);font-size:13px">گزارش تفصیلی‌تر در نسخه‌های بعدی افزونه اضافه می‌شود. خلاصه بالا از داده‌های زنده ووکامرس خوانده می‌شود.</div></section>
+      </section>
+
+      <section id="section-settings" class="app-section">
+        <div class="pagehead"><div><h1>تنظیمات</h1><p>تنظیمات افزونه سفارش‌بان</p></div></div>
+        <section class="card"><div style="padding:20px;display:flex;flex-direction:column;gap:14px;max-width:720px">
+          <div><b style="display:block;margin-bottom:4px">درباره افزونه</b><span class="muted">سفارش‌بان - رابط مدیریت سفارشات ووکامرس. نسخه <?php echo esc_html( SEFARESHBAN_VERSION ); ?></span></div>
+          <div><b style="display:block;margin-bottom:4px">سازگاری</b><span class="muted">سازگار با HPOS ووکامرس و حالت Legacy.</span></div>
+          <div><b style="display:block;margin-bottom:4px">میانبر</b><span class="muted">برای دسترسی به صفحه بومی سفارشات ووکامرس، پارامتر <code>sefareshban_native=1</code> را به URL اضافه کنید.</span></div>
+        </div></section>
+      </section>
 
       </div>
     </main>

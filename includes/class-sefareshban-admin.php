@@ -22,6 +22,7 @@ class Sefareshban_Admin {
 		add_action( 'admin_head', array( $this, 'hide_default_orders_menu_css' ) );
 		add_filter( 'parent_file', array( $this, 'highlight_menu' ) );
 		add_filter( 'submenu_file', array( $this, 'highlight_submenu' ) );
+		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
 	}
 
 	public function register_menu() {
@@ -203,5 +204,13 @@ class Sefareshban_Admin {
 			return 'sefareshban-orders';
 		}
 		return $submenu_file;
+	}
+
+	public function admin_body_class( $classes ) {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'sefareshban-orders' === $page ) {
+			$classes .= ' sefareshban-admin-page ';
+		}
+		return $classes;
 	}
 }

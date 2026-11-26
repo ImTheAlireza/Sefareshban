@@ -23,6 +23,8 @@ class Sefareshban_API {
 			'sefareshban_add_note',
 			'sefareshban_bulk_action',
 			'sefareshban_export_csv',
+			'sefareshban_get_customers',
+			'sefareshban_get_products',
 		);
 		foreach ( $actions as $action ) {
 			add_action( 'wp_ajax_' . $action, array( $this, $action ) );
@@ -596,5 +598,61 @@ class Sefareshban_API {
 			'filename' => 'woo-orders-' . gmdate( 'Ymd-His' ) . '.csv',
 			'count'    => count( $orders ),
 		) );
+	}
+
+	public function sefareshban_get_customers() {
+		$this->verify();
+		$limit = 100;
+		$orders = wc_get_orders( array(
+			'limit'   => 200,
+			'return'  => 'objects',
+			'orderby' => 'date',
+			'order'   => 'DESC',
+		) );
+		$map = array();
+		foreach ( $orders as $order ) {
+			$email = strtolower( trim( (string) $order->get_billing_email() ) );
+			$key = $email !== '' ? $email : 'guest-' . $order->get_id();
+			if ( ! isset( $map[ $key ] ) ) {
+				$map[ $key ] = array(
+					'name'   => trim( $order->get_formatted_billing_full_name() ) ?: 'مهمان',
+					'email'  => $order->get_billing_email(),
+					'phone'  => $order->get_billing_phone(),
+					'city'   => $order->get_billing_city(),
+					'orders' => 0,
+					'total'  => 0.0,
+				);
+			}
+			$map[ $key ]['orders'] += 1;
+			$map[ $key ]['total']  += (float) $order->get_total();
+			if ( $map[ $key ]['phone'] === '' ) { $map[ $key ]['phone'] = $order->get_billing_phone(); }
+			if ( $map[ $key ]['city'] === '' ) { $map[ $key ]['city'] = $order->get_billing_city(); }
+		}
+		usort( $map, function( $a, $b ) { return $b['orders'] <=> $a['orders']; } );
+		$rows = array_slice( array_values( $map ), 0, $limit );
+		wp_send_json_success( array( 'rows' => $rows ) );
+	}
+
+	public function sefareshban_get_products() {
+		$this->verify();
+		$products = wc_get_products( array(
+			'limit'   => 100,
+			'status'  => array( 'publish', 'draft' ),
+			'orderby' => 'date',
+			'order'   => 'DESC',
+		) );
+		$rows = array();
+		foreach ( $products as $product ) {
+			$rows[] = array(
+				'id'          => $product->get_id(),
+				'name'        => $product->get_name(),
+				'sku'         => $product->get_sku(),
+				'price'       => (float) $product->get_price(),
+				'stock'       => $product->managing_stock() ? (int) $product->get_stock_quantity() : null,
+				'status'      => $product->get_status(),
+				'total_sales' => (int) $product->get_total_sales(),
+			);
+		}
+		wp_send_json_success( array( 'rows' => $rows ) );
 	}
 }

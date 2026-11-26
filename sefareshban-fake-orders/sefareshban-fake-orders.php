@@ -1,14 +1,13 @@
 <?php
 /**
- * Plugin Name:       تولیدکننده سفارش فیک (برای تست سفارش‌بان)
- * Plugin URI:        https://github.com/ImTheAlireza/Sefareshban
- * Description:       ساخت سفارش‌های فیک ووکامرس برای تست افزونه سفارش‌بان. امکان ساخت دستی و ساخت خودکار هر ۵ دقیقه.
- * Version:           1.0.0
- * Author:            Sefareshban
+ * Plugin Name: Sefareshban Fake Orders
+ * Description: Creates fake WooCommerce orders for testing Sefareshban. Supports manual generation and automatic generation every 5 minutes via WP-Cron.
+ * Version: 1.0.0
+ * Author: Sefareshban
  * Requires at least: 6.0
- * Requires PHP:      7.4
- * WC requires at least: 7.0
- * Text Domain:       sefareshban-fake-orders
+ * Requires PHP: 7.4
+ * License: GPLv2 or later
+ * Text Domain: sefareshban-fake-orders
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -57,21 +56,22 @@ function sfog_deactivate() {
 	wp_clear_scheduled_hook( SFOG_CRON_HOOK );
 }
 
-add_filter( 'cron_schedules', function ( $schedules ) {
+add_filter( 'cron_schedules', 'sfog_cron_schedules' );
+function sfog_cron_schedules( $schedules ) {
 	$schedules['sfog_every_5_minutes'] = array(
 		'interval' => 5 * MINUTE_IN_SECONDS,
-		'display'  => 'هر ۵ دقیقه (سفارش فیک)',
+		'display'  => 'Every 5 Minutes (Sefareshban Fake Orders)',
 	);
 	$schedules['sfog_every_10_minutes'] = array(
 		'interval' => 10 * MINUTE_IN_SECONDS,
-		'display'  => 'هر ۱۰ دقیقه (سفارش فیک)',
+		'display'  => 'Every 10 Minutes (Sefareshban Fake Orders)',
 	);
 	$schedules['sfog_every_15_minutes'] = array(
 		'interval' => 15 * MINUTE_IN_SECONDS,
-		'display'  => 'هر ۱۵ دقیقه (سفارش فیک)',
+		'display'  => 'Every 15 Minutes (Sefareshban Fake Orders)',
 	);
 	return $schedules;
-} );
+}
 
 function sfog_schedule_name( $minutes ) {
 	$minutes = (int) $minutes;
@@ -110,13 +110,15 @@ function sfog_cron_generate() {
 	}
 }
 
-add_action( 'before_woocommerce_init', function () {
-	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+add_action( 'before_woocommerce_init', 'sfog_declare_hpos' );
+function sfog_declare_hpos() {
+	if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 	}
-} );
+}
 
-add_action( 'admin_menu', function () {
+add_action( 'admin_menu', 'sfog_admin_menu' );
+function sfog_admin_menu() {
 	add_submenu_page(
 		'woocommerce',
 		'سفارش‌های فیک',
@@ -125,13 +127,14 @@ add_action( 'admin_menu', function () {
 		'sfog-generator',
 		'sfog_render_admin_page'
 	);
-} );
+}
 
 add_action( 'admin_init', 'sfog_handle_actions' );
 function sfog_handle_actions() {
 	if ( ! current_user_can( 'manage_woocommerce' ) ) {
 		return;
 	}
+
 	if ( isset( $_POST['sfog_action'] ) && $_POST['sfog_action'] === 'save_settings' ) {
 		check_admin_referer( 'sfog_save_settings' );
 		$enabled  = isset( $_POST['sfog_enabled'] ) ? 1 : 0;
@@ -139,8 +142,7 @@ function sfog_handle_actions() {
 		if ( ! in_array( $interval, array( 5, 10, 15 ), true ) ) {
 			$interval = 5;
 		}
-		$per_run = (int) ( $_POST['sfog_per_run'] ?? 1 );
-		$per_run = max( 1, min( 5, $per_run ) );
+		$per_run = max( 1, min( 5, (int) ( $_POST['sfog_per_run'] ?? 1 ) ) );
 		sfog_update_settings( array(
 			'enabled'          => $enabled,
 			'interval_minutes' => $interval,
@@ -152,8 +154,7 @@ function sfog_handle_actions() {
 
 	if ( isset( $_POST['sfog_action'] ) && $_POST['sfog_action'] === 'generate_now' ) {
 		check_admin_referer( 'sfog_generate_now' );
-		$count = (int) ( $_POST['sfog_count'] ?? 1 );
-		$count = max( 1, min( 20, $count ) );
+		$count   = max( 1, min( 20, (int) ( $_POST['sfog_count'] ?? 1 ) ) );
 		$created = 0;
 		for ( $i = 0; $i < $count; $i++ ) {
 			$id = sfog_create_fake_order();
@@ -216,22 +217,20 @@ function sfog_render_admin_page() {
 				</table>
 				<p><button type="submit" class="button button-primary">ذخیره تنظیمات</button></p>
 			</form>
-
 			<hr>
 			<p><strong>وضعیت:</strong>
 				<?php if ( $next ) : ?>
 					اجرای بعدی: <?php echo esc_html( wp_date( 'Y-m-d H:i:s', $next ) ); ?>
-					(<?php echo esc_html( human_time_diff( time(), $next ) ); ?> دیگر)
 				<?php else : ?>
 					زمان‌بندی فعال نیست.
 				<?php endif; ?>
 			</p>
 			<p><strong>تعداد کل ساخته‌شده:</strong> <?php echo esc_html( (int) $settings['total_generated'] ); ?>
-			<?php if ( ! empty( $settings['last_order_id'] ) ) : ?>
-				| <strong>آخرین سفارش:</strong> #<?php echo esc_html( (int) $settings['last_order_id'] ); ?>
-			<?php endif; ?>
+				<?php if ( ! empty( $settings['last_order_id'] ) ) : ?>
+					| <strong>آخرین سفارش:</strong> #<?php echo esc_html( (int) $settings['last_order_id'] ); ?>
+				<?php endif; ?>
 			</p>
-			<p style="color:#666">نکته: WP-Cron با بازدید از سایت اجرا می‌شود. برای تست لوکال، صفحه ادمین یا سایت را باز نگه دارید یا با WP-CLI cron را اجرا کنید.</p>
+			<p style="color:#666">نکته: WP-Cron با بازدید از سایت اجرا می‌شود. برای تست لوکال، صفحه ادمین یا سایت را باز نگه دارید.</p>
 		</div>
 	</div>
 	<?php
@@ -244,7 +243,7 @@ function sfog_random( $arr ) {
 function sfog_fake_data() {
 	$first_names = array( 'علی', 'محمد', 'مهدی', 'رضا', 'حسین', 'امیر', 'سارا', 'زهرا', 'مریم', 'نگار', 'الهام', 'فاطمه', 'نیلوفر', 'پریسا', 'آرش', 'سینا', 'کامران', 'بهناز', 'شیدا', 'حمید' );
 	$last_names  = array( 'احمدی', 'محمدی', 'رضایی', 'حسینی', 'کریمی', 'صادقی', 'موسوی', 'نیک‌نام', 'کاظمی', 'شریفی', 'فتحی', 'یاسمی', 'دهقان', 'عابدی', 'بیات', 'مرادی', 'جعفری', 'قاسمی', 'هاشمی', 'اکبری' );
-	$cities = array(
+	$cities      = array(
 		array( 'city' => 'تهران', 'state' => 'تهران' ),
 		array( 'city' => 'اصفهان', 'state' => 'اصفهان' ),
 		array( 'city' => 'شیراز', 'state' => 'فارس' ),
@@ -254,11 +253,9 @@ function sfog_fake_data() {
 		array( 'city' => 'قم', 'state' => 'قم' ),
 		array( 'city' => 'اهواز', 'state' => 'خوزستان' ),
 		array( 'city' => 'رشت', 'state' => 'گیلان' ),
-		array( 'city' => 'کرمان', 'state' => 'کرمان' ),
 		array( 'city' => 'یزد', 'state' => 'یزد' ),
-		array( 'city' => 'همدان', 'state' => 'همدان' ),
 	);
-	$streets = array( 'خیابان ولیعصر', 'بلوار آزادی', 'خیابان امام', 'خیابان انقلاب', 'بلوار کشاورز', 'خیابان شریعتی', 'خیابان فردوسی', 'بلوار مدرس', 'خیابان سعدی', 'خیابان بهشتی' );
+	$streets  = array( 'خیابان ولیعصر', 'بلوار آزادی', 'خیابان امام', 'خیابان انقلاب', 'بلوار کشاورز', 'خیابان شریعتی', 'خیابان فردوسی', 'بلوار مدرس' );
 	$payments = array(
 		array( 'id' => 'zarinpal', 'title' => 'زرین‌پال' ),
 		array( 'id' => 'cod', 'title' => 'پرداخت در محل' ),
@@ -270,10 +267,15 @@ function sfog_fake_data() {
 }
 
 function sfog_ensure_dummy_products() {
-	$existing = wc_get_products( array( 'limit' => 10, 'status' => 'publish', 'return' => 'ids' ) );
+	$existing = wc_get_products( array(
+		'limit'  => 10,
+		'status' => 'publish',
+		'return' => 'ids',
+	) );
 	if ( ! empty( $existing ) ) {
 		return $existing;
 	}
+
 	$dummy = array(
 		array( 'name' => 'قهوه اسپرسو ۲۵۰ گرمی', 'price' => 380000 ),
 		array( 'name' => 'ماگ سرامیکی دست‌ساز', 'price' => 450000 ),
@@ -284,16 +286,16 @@ function sfog_ensure_dummy_products() {
 		array( 'name' => 'شال نخی طرح ترمه', 'price' => 680000 ),
 		array( 'name' => 'عسل طبیعی ۱kg', 'price' => 1150000 ),
 	);
+
 	$ids = array();
 	foreach ( $dummy as $d ) {
-		$p = new WC_Product_Simple();
-		$p->set_name( $d['name'] );
-		$p->set_regular_price( $d['price'] );
-		$p->set_price( $d['price'] );
-		$p->set_status( 'publish' );
-		$p->set_catalog_visibility( 'visible' );
-		$p->set_manage_stock( false );
-		$id = $p->save();
+		$product = new WC_Product_Simple();
+		$product->set_name( $d['name'] );
+		$product->set_regular_price( (string) $d['price'] );
+		$product->set_status( 'publish' );
+		$product->set_catalog_visibility( 'visible' );
+		$product->set_manage_stock( false );
+		$id = $product->save();
 		if ( $id ) {
 			$ids[] = $id;
 		}
@@ -303,11 +305,11 @@ function sfog_ensure_dummy_products() {
 
 function sfog_persian_phone() {
 	$prefixes = array( '0912', '0913', '0914', '0915', '0917', '0918', '0919', '0935', '0936', '0937', '0990', '0991' );
-	$p = sfog_random( $prefixes );
+	$phone    = sfog_random( $prefixes );
 	for ( $i = 0; $i < 7; $i++ ) {
-		$p .= wp_rand( 0, 9 );
+		$phone .= (string) wp_rand( 0, 9 );
 	}
-	return $p;
+	return $phone;
 }
 
 function sfog_create_fake_order() {
@@ -315,16 +317,16 @@ function sfog_create_fake_order() {
 		return false;
 	}
 
-	$data = sfog_fake_data();
-	$first = sfog_random( $data['first_names'] );
-	$last  = sfog_random( $data['last_names'] );
-	$loc   = sfog_random( $data['cities'] );
-	$street = sfog_random( $data['streets'] );
+	$data    = sfog_fake_data();
+	$first   = sfog_random( $data['first_names'] );
+	$last    = sfog_random( $data['last_names'] );
+	$loc     = sfog_random( $data['cities'] );
+	$street  = sfog_random( $data['streets'] );
 	$payment = sfog_random( $data['payments'] );
 	$status  = sfog_random( $data['statuses'] );
 
-	$email = 'fake_' . sanitize_title( $first . '.' . $last ) . wp_rand( 10, 999 ) . '@example.test';
-	$phone = sfog_persian_phone();
+	$email    = 'fake_' . sanitize_title( $first . '_' . $last ) . wp_rand( 10, 999 ) . '@example.test';
+	$phone    = sfog_persian_phone();
 	$address1 = $street . '، کوچه ' . wp_rand( 1, 30 ) . '، پلاک ' . wp_rand( 1, 150 );
 	$postcode = (string) wp_rand( 1000000000, 9999999999 );
 
@@ -356,47 +358,53 @@ function sfog_create_fake_order() {
 	$order->set_shipping_address_1( $address1 );
 	$order->set_shipping_postcode( $postcode );
 
-	$item_count = wp_rand( 1, 4 );
-	shuffle( $product_ids );
-	$picked = array_slice( $product_ids, 0, min( $item_count, count( $product_ids ) ) );
+	$item_count  = wp_rand( 1, 4 );
+	$shuffled    = $product_ids;
+	shuffle( $shuffled );
+	$picked = array_slice( $shuffled, 0, min( $item_count, count( $shuffled ) ) );
 	foreach ( $picked as $pid ) {
 		$product = wc_get_product( $pid );
 		if ( ! $product ) {
 			continue;
 		}
-		$qty = wp_rand( 1, 3 );
-		$order->add_product( $product, $qty );
+		$order->add_product( $product, wp_rand( 1, 3 ) );
 	}
 
 	$shipping = new WC_Order_Item_Shipping();
 	$shipping->set_method_title( 'ارسال پستی' );
 	$shipping->set_method_id( 'flat_rate' );
-	$shipping->set_total( wp_rand( 0, 1 ) ? wp_rand( 30, 120 ) * 1000 : 0 );
+	$shipping->set_total( (string) ( wp_rand( 0, 1 ) ? wp_rand( 30, 120 ) * 1000 : 0 ) );
 	$order->add_item( $shipping );
 
 	$order->set_payment_method( $payment['id'] );
 	$order->set_payment_method_title( $payment['title'] );
 	$order->set_created_via( 'sfog_fake_generator' );
-	$order->set_customer_note( sfog_random( array( '', '', '', 'لطفاً قبل از ارسال تماس بگیرید.', 'بسته‌بندی هدیه باشد.', 'در ساعات عصر ارسال شود.' ) ) );
+	$order->set_customer_note( sfog_random( array(
+		'',
+		'',
+		'',
+		'لطفاً قبل از ارسال تماس بگیرید.',
+		'بسته‌بندی هدیه باشد.',
+		'در ساعات عصر ارسال شود.',
+	) ) );
 
-	// Recent date (within last 2 hours) so dashboard feels live
+	// Recent date so dashboard feels live.
 	$minutes_ago = wp_rand( 0, 120 );
-	$date = gmdate( 'Y-m-d H:i:s', time() - ( $minutes_ago * 60 ) );
-	$order->set_date_created( $date );
+	$order->set_date_created( gmdate( 'Y-m-d H:i:s', time() - ( $minutes_ago * 60 ) ) );
 
 	$order->calculate_totals();
 	$order_id = $order->save();
 
-	// Set status after save to trigger normal status transitions/notes.
-	$order = wc_get_order( $order_id );
-	if ( $order ) {
-		$order->update_status( $status, 'سفارش فیک ساخته‌شده توسط افزونه تست سفارش‌بان', true );
+	$saved = wc_get_order( $order_id );
+	if ( $saved ) {
+		$saved->update_status( $status, 'سفارش فیک ساخته‌شده توسط افزونه تست سفارش‌بان', true );
 	}
 
+	$settings = sfog_get_settings();
 	sfog_update_settings( array(
 		'last_run'        => time(),
-		'last_order_id'   => $order_id,
-		'total_generated' => (int) sfog_get_settings()['total_generated'] + 1,
+		'last_order_id'   => (int) $order_id,
+		'total_generated' => (int) $settings['total_generated'] + 1,
 	) );
 
 	return $order_id;

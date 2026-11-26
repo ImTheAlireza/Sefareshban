@@ -160,49 +160,22 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
               </span>
               در انتظار انجام
-              <span class="kpi-tag" title="سفارش‌های پرداخت‌شده که هنوز ارسال نشده‌اند">صف ارسال</span>
+              <span class="kpi-tag" title="سفارش‌های در انتظار اقدام">۷ روز اخیر</span>
             </div>
             <div class="kpi-main">
               <div class="kpi-metrics">
                 <div class="kpi-value num">۷ <small>سفارش</small></div>
                 <div class="kpi-foot">
-                  <span class="delta down">۳ فوری</span>
-                  <span>بیش از ۲۴ ساعت</span>
-                </div>
-              </div>
-              <div class="kpi-ring" role="img" aria-label="سهم سفارش‌های فوری ۴۳ درصد از ۷ سفارش در انتظار">
-                <svg viewBox="0 0 48 48" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="ringUrgentGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stop-color="var(--c-amber)"/>
-                      <stop offset="100%" stop-color="var(--c-rose)"/>
-                    </linearGradient>
-                  </defs>
-                  <circle class="ring-track" cx="24" cy="24" r="19"/>
-                  <circle class="ring-seg" cx="24" cy="24" r="19" stroke="var(--info)" stroke-dasharray="65 120" stroke-dashoffset="0"/>
-                  <circle class="ring-seg" cx="24" cy="24" r="19" stroke="url(#ringUrgentGrad)" stroke-dasharray="48 120" stroke-dashoffset="-70"/>
-                </svg>
-                <div class="kpi-ring-txt">
-                  <b class="num">۴۳٪</b>
-                  <span>فوری</span>
+                  <span class="delta down">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    ۳ فوری
+                  </span>
+                  <span>نیازمند بررسی</span>
                 </div>
               </div>
             </div>
-            <div class="kpi-chart">
-              <div class="sla-wrap">
-                <div class="sla-bar" role="img" aria-label="۴ سفارش در صف عادی و ۳ سفارش بیش از ۲۴ ساعت">
-                  <div class="sla-seg urgent" style="width:43%" data-filter-tab="pending" title="۳ سفارش بیش از ۲۴ ساعت"></div>
-                  <div class="sla-seg normal" style="width:57%" data-filter-tab="processing" title="۴ سفارش در صف عادی"></div>
-                </div>
-                <div class="sla-legend">
-                  <button type="button" class="sla-pill" data-filter-tab="pending">
-                    <i style="background:var(--c-rose)"></i>تأخیری <b class="num">۳</b>
-                  </button>
-                  <button type="button" class="sla-pill" data-filter-tab="processing">
-                    <i style="background:var(--info)"></i>عادی <b class="num">۴</b>
-                  </button>
-                </div>
-              </div>
+            <div class="kpi-chart" id="chartPending">
+              <div class="viz-tip num" aria-hidden="true"></div>
             </div>
           </article>
 

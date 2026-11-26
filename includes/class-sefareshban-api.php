@@ -184,7 +184,8 @@ class Sefareshban_API {
 		$row['disc']     = (float) $order->get_discount_total();
 		$row['subtotal'] = (float) $order->get_subtotal();
 		$row['notes']    = $notes;
-		$row['editUrl']  = $order->get_edit_order_url();
+		$edit_url = $order->get_edit_order_url();
+		$row['editUrl']  = $edit_url ? add_query_arg( 'sefareshban_native', '1', $edit_url ) : '';
 		$row['orderCount'] = $this->get_customer_order_count( $order );
 		return $row;
 	}
@@ -270,6 +271,8 @@ class Sefareshban_API {
 
 		// 7-day series.
 		$series7 = array();
+		$pending_series7 = array();
+		$pending_statuses_set = array( 'pending', 'on-hold', 'processing' );
 		for ( $i = 6; $i >= 0; $i-- ) {
 			$day_start = strtotime( '-' . $i . ' days', $today_start );
 			$day_end   = strtotime( '+1 day', $day_start ) - 1;
@@ -280,15 +283,24 @@ class Sefareshban_API {
 				'status'       => array_keys( wc_get_order_statuses() ),
 			) );
 			$sales = 0;
+			$pending_count_day = 0;
 			foreach ( $day_orders as $o ) {
 				if ( $o->is_paid() ) {
 					$sales += (float) $o->get_total();
 				}
+				if ( in_array( $o->get_status(), $pending_statuses_set, true ) ) {
+					$pending_count_day++;
+				}
 			}
+			$label = wp_date( 'D', $day_start );
 			$series7[] = array(
-				'label'  => wp_date( 'D', $day_start ),
-				'count'  => count( $day_orders ),
-				'sales'  => $sales,
+				'label' => $label,
+				'count' => count( $day_orders ),
+				'sales' => $sales,
+			);
+			$pending_series7[] = array(
+				'label' => $label,
+				'count' => $pending_count_day,
 			);
 		}
 
@@ -325,6 +337,7 @@ class Sefareshban_API {
 			'urgentCount'     => $urgent_count,
 			'aov30'           => $aov30,
 			'series7'         => $series7,
+			'pendingSeries7'  => $pending_series7,
 			'aovSeries'       => $aov_series,
 		) );
 	}

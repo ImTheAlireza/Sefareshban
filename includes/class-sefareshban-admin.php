@@ -163,9 +163,12 @@ class Sefareshban_Admin {
 			if ( isset( $_GET['sefareshban_native'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
-			// Preserve action=view etc? If viewing a single order in native screen, let it pass through.
 			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( in_array( $action, array( 'edit', 'new' ), true ) ) {
+			// Let native edit/create/trash/view flows work.
+			if ( in_array( $action, array( 'edit', 'new', 'trash', 'untrash', 'delete', 'view' ), true ) ) {
+				return;
+			}
+			if ( isset( $_GET['id'] ) && '' !== $action ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
 			wp_safe_redirect( admin_url( 'admin.php?page=sefareshban-orders' ) );

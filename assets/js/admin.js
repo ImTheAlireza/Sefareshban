@@ -239,34 +239,14 @@
     if (pendingEl) pendingEl.innerHTML = `${fa(stats.pendingCount||0)} <small>سفارش</small>`;
     const urgent = stats.urgentCount||0;
     const pending = stats.pendingCount||0;
-    const urgentPct = pending ? Math.round((urgent / pending) * 100) : 0;
-    const ringTxt = document.querySelector('.kpi-ring-txt b');
-    if (ringTxt) ringTxt.textContent = fa(urgentPct) + '٪';
     const deltaUrgent = document.querySelector('.kpi[data-tone="amber"] .delta');
     if (deltaUrgent) {
-      deltaUrgent.className = 'delta down';
-      deltaUrgent.textContent = `${fa(urgent)} فوری`;
+      const hasUrgent = urgent > 0;
+      deltaUrgent.className = 'delta ' + (hasUrgent ? 'down' : 'up');
+      deltaUrgent.innerHTML = hasUrgent
+        ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5l3 2"/></svg>${fa(urgent)} فوری`
+        : `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>بدون تأخیر`;
     }
-    // Update ring segments
-    const segs = document.querySelectorAll('.kpi-ring .ring-seg');
-    if (segs.length >= 2) {
-      const totalCirc = 119.38; // 2*pi*19
-      const urgentLen = (urgentPct/100) * totalCirc;
-      const normalLen = totalCirc - urgentLen;
-      segs[0].setAttribute('stroke-dasharray', `${normalLen.toFixed(1)} ${totalCirc.toFixed(1)}`);
-      segs[0].setAttribute('stroke-dashoffset', '0');
-      segs[1].setAttribute('stroke-dasharray', `${urgentLen.toFixed(1)} ${totalCirc.toFixed(1)}`);
-      segs[1].setAttribute('stroke-dashoffset', `-${(normalLen + 5).toFixed(1)}`);
-    }
-    const slaUrgent = document.querySelector('.sla-seg.urgent');
-    const slaNormal = document.querySelector('.sla-seg.normal');
-    if (slaUrgent && slaNormal) {
-      slaUrgent.style.width = urgentPct + '%';
-      slaNormal.style.width = (100 - urgentPct) + '%';
-    }
-    const slaPills = document.querySelectorAll('.sla-pill b');
-    if (slaPills[0]) slaPills[0].textContent = fa(urgent);
-    if (slaPills[1]) slaPills[1].textContent = fa(Math.max(0, pending - urgent));
 
     // Promo
     const promoB = document.querySelector('.promo b');
@@ -700,6 +680,16 @@ function renderKpiCharts(){
     label:'نمودار روند فروش ۷ روز اخیر',
     showAvg: true,
     fmt: v => `${fa(Math.round(v))} تومان`
+  });
+
+  const pendingData = (s && s.pendingSeries7 && s.pendingSeries7.length) ? s.pendingSeries7.map(d => ({t: d.label, v: d.count})) : [
+    {t:'شنبه', v:5}, {t:'یکشنبه', v:6}, {t:'دوشنبه', v:4},
+    {t:'سه‌شنبه', v:7}, {t:'چهارشنبه', v:5}, {t:'پنج‌شنبه', v:6}, {t:'امروز', v:7}
+  ];
+  const chartPending = $('#chartPending');
+  if (chartPending) drawBarChart(chartPending, pendingData, {
+    label:'نمودار سفارش‌های در انتظار ۷ روز اخیر',
+    fmt: v => `${fa(v)} سفارش`
   });
 
   const aovData = (s && s.aovSeries && s.aovSeries.length) ? s.aovSeries.map(d => ({t: d.label, v: Math.round(d.value)})) : [

@@ -630,7 +630,7 @@ tr:hover .dots{color:var(--muted)}
 }
 .scrim.show{opacity:1;pointer-events:auto}
 .drawer{
-  position:fixed;top:16px;bottom:16px;left:16px;
+  position:fixed;top:calc(var(--wp-admin--admin-bar--height,32px) + 12px);bottom:16px;left:16px;
   width:min(452px,calc(100vw - 32px));
   background:var(--surface);
   border:1px solid var(--border);
@@ -729,7 +729,7 @@ tr:hover .dots{color:var(--muted)}
 
 /* toast */
 .toast{
-  position:fixed;bottom:26px;right:26px;z-index:80;
+  position:fixed;bottom:26px;inset-inline-end:26px;inset-inline-start:auto;z-index:999999;
   display:flex;align-items:center;gap:8px;
   background:#1b1b20;color:#fff;
   padding:10px 15px;border-radius:var(--r-pill);
@@ -737,7 +737,7 @@ tr:hover .dots{color:var(--muted)}
   box-shadow:0 20px 44px -16px rgba(0,0,0,.45);
   transform:translateY(16px);opacity:0;pointer-events:none;
   transition:transform .24s ease,opacity .24s ease;
-  max-width:min(380px,90vw);
+  max-width:min(380px,calc(100vw - 52px));
 }
 .sefareshban-root[data-theme="dark"] .toast{background:#302d38;border:1px solid var(--border)}
 .toast.show{transform:none;opacity:1}

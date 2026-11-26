@@ -164,6 +164,12 @@ function sfog_handle_actions() {
 		}
 		add_settings_error( 'sfog', 'sfog_generated', sprintf( '%d سفارش فیک ساخته شد.', $created ), 'updated' );
 	}
+
+	if ( isset( $_POST['sfog_action'] ) && $_POST['sfog_action'] === 'fix_emails' ) {
+		check_admin_referer( 'sfog_fix_emails' );
+		$fixed = sfog_fix_broken_emails();
+		add_settings_error( 'sfog', 'sfog_fixed', sprintf( 'ایمیل %d سفارش فیک اصلاح شد.', $fixed ), 'updated' );
+	}
 }
 
 function sfog_render_admin_page() {
@@ -187,6 +193,16 @@ function sfog_render_admin_page() {
 					<input type="number" name="sfog_count" value="5" min="1" max="20" style="width:90px">
 				</label>
 				<button type="submit" class="button button-primary">ساخت سفارش فیک</button>
+			</form>
+		</div>
+
+		<div style="background:#fff;border:1px solid #dcdcde;padding:20px;border-radius:8px;margin:16px 0">
+			<h2 style="margin-top:0">اصلاح ایمیل‌های فیک خراب</h2>
+			<p style="color:#555">اگر سفارش‌های فیک قبلی ایمیل خراب (مثل <code>fake_%d9...</code>) دارند، با این دکمه ایمیل آن‌ها به ایمیل‌های ASCII تمیز تبدیل می‌شود.</p>
+			<form method="post">
+				<?php wp_nonce_field( 'sfog_fix_emails' ); ?>
+				<input type="hidden" name="sfog_action" value="fix_emails">
+				<button type="submit" class="button">اصلاح ایمیل سفارش‌های فیک</button>
 			</form>
 		</div>
 
@@ -313,6 +329,38 @@ function sfog_persian_phone() {
 }
 
 
+
+function sfog_is_broken_fake_email( $email ) {
+	$email = (string) $email;
+	if ( $email === '' ) return false;
+	if ( strpos( $email, '%' ) !== false ) return true;
+	if ( strpos( $email, 'fake_' ) === 0 ) return true;
+	if ( ! is_email( $email ) ) return true;
+	return false;
+}
+
+function sfog_fix_broken_emails() {
+	if ( ! function_exists( 'wc_get_orders' ) ) return 0;
+	$orders = wc_get_orders( array(
+		'limit'  => -1,
+		'return' => 'objects',
+		'status' => array_keys( wc_get_order_statuses() ),
+	) );
+	$fixed = 0;
+	foreach ( $orders as $order ) {
+		$email = (string) $order->get_billing_email();
+		if ( ! sfog_is_broken_fake_email( $email ) ) {
+			continue;
+		}
+		$first = $order->get_billing_first_name();
+		$last  = $order->get_billing_last_name();
+		$new_email = sfog_fake_email( $first, $last );
+		$order->set_billing_email( $new_email );
+		$order->save();
+		$fixed++;
+	}
+	return $fixed;
+}
 function sfog_fake_email( $first = '', $last = '' ) {
 	$latin_first = array( 'ali', 'mohammad', 'mehdi', 'reza', 'hossein', 'amir', 'sara', 'zahra', 'maryam', 'negar', 'elham', 'fatemeh', 'niloufar', 'parisa', 'arash', 'sina', 'kamran', 'behnaz', 'shida', 'hamid' );
 	$latin_last  = array( 'ahmadi', 'mohammadi', 'rezaei', 'hosseini', 'karimi', 'sadeghi', 'mousavi', 'niknam', 'kazemi', 'sharifi', 'fathi', 'yasemi', 'dehghan', 'abedi', 'bayat', 'moradi', 'jafari', 'ghasemi', 'hashemi', 'akbari' );

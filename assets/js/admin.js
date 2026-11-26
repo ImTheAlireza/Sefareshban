@@ -520,6 +520,7 @@ function positionTip(host, tip, ratio){
 }
 
 function drawBarChart(el, items, opts){
+  if (!el) return;
   el.querySelector('svg.viz')?.remove();
   const W = Math.max(170, Math.round(el.clientWidth || 220)), H = 54, padT = 8, padB = 4, padX = 2;
   const max = Math.max(...items.map(d => d.v)) * 1.12;
@@ -580,6 +581,7 @@ function drawBarChart(el, items, opts){
 }
 
 function drawAreaChart(el, items, opts){
+  if (!el) return;
   el.querySelector('svg.viz')?.remove();
   const W = Math.max(170, Math.round(el.clientWidth || 236)), H = 54, padT = 10, padB = 6, padX = 7;
   const vals = items.map(d => d.v);
@@ -853,6 +855,7 @@ function renderKpiCharts(){
     if (name === 'customers' && !customersLoaded) loadCustomers();
     if (name === 'products' && !productsLoaded) loadProducts();
     if (name === 'reports') loadReports();
+    if (name === 'orders') setTimeout(renderKpiCharts, 60);
   }
   $$('[data-section]').forEach(a => a.addEventListener('click', e => {
     e.preventDefault();
@@ -898,11 +901,14 @@ function renderKpiCharts(){
     } catch(e) { console.error(e); if (body) body.innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--danger)">خطا در دریافت محصولات</td></tr>'; }
   }
 
-  function loadReports() {
+  async function loadReports() {
+    if (!state.stats) {
+      await fetchStats();
+    }
     const s = state.stats;
-    if (!s) { fetchStats().then(loadReports); return; }
+    if (!s) return;
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
-    set('repTotalOrders', fa(s.statusCountsAll || state.statusCounts.all || 0) + ' <small>سفارش</small>');
+    set('repTotalOrders', fa(state.statusCounts.all || 0) + ' <small>سفارش</small>');
     set('repTodaySales', fa(Math.round(s.todaySales||0)) + ' <small>' + esc(i18n.toman||'تومان') + '</small>');
     set('repPending', fa(s.pendingCount||0) + ' <small>سفارش</small>');
     set('repAov', fa(Math.round(s.aov30||0)) + ' <small>' + esc(i18n.toman||'تومان') + '</small>');

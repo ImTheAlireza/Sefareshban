@@ -137,8 +137,7 @@ class Sefareshban_Admin {
 	}
 
 	private function get_wc_orders_url() {
-		if ( function_exists( 'wc_get_page_screen_id' ) && class_exists( '\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' ) ) {
-			// Try HPOS-aware URL.
+		if ( class_exists( 'Automattic\\WooCommerce\\Utilities\\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			return admin_url( 'admin.php?page=wc-orders' );
 		}
 		return admin_url( 'edit.php?post_type=shop_order' );
@@ -149,14 +148,17 @@ class Sefareshban_Admin {
 			return;
 		}
 
-		// Legacy orders screen.
-		if ( 'edit-shop_order' === $screen->id || 'shop_order' === $screen->id ) {
-			// Allow direct access if explicitly requested (escape hatch).
+		// Legacy orders list screen.
+		if ( 'edit-shop_order' === $screen->id ) {
 			if ( isset( $_GET['sefareshban_native'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
 			wp_safe_redirect( admin_url( 'admin.php?page=sefareshban-orders' ) );
 			exit;
+		}
+		// Legacy single order edit screen - let it through.
+		if ( 'shop_order' === $screen->id ) {
+			return;
 		}
 
 		// HPOS orders screen.

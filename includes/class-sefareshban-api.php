@@ -393,16 +393,12 @@ class Sefareshban_API {
 			}
 		}
 
-		$orders = wc_get_orders( $args );
-
 		// Get total count. wc_get_orders with paginate gives total.
 		$count_args = $args;
 		$count_args['paginate'] = true;
-		$count_args['limit']    = $per_page;
-		$count_args['paged']    = $page;
 		$result = wc_get_orders( $count_args );
-		$total  = is_object( $result ) && isset( $result->total ) ? (int) $result->total : count( $orders );
-		$orders = is_object( $result ) && isset( $result->orders ) ? $result->orders : $orders;
+		$total  = is_object( $result ) && isset( $result->total ) ? (int) $result->total : 0;
+		$orders = is_object( $result ) && isset( $result->orders ) ? $result->orders : array();
 
 		$rows = array();
 		foreach ( $orders as $order ) {
@@ -517,6 +513,10 @@ class Sefareshban_API {
 		if ( 'status' === $bulk ) {
 			$status = sanitize_text_field( wp_unslash( $_POST['status'] ?? 'processing' ) );
 			$wc_status = $this->wc_status( $status );
+			$allowed = array_keys( wc_get_order_statuses() );
+			if ( ! in_array( 'wc-' . $wc_status, $allowed, true ) ) {
+				wp_send_json_error( array( 'message' => 'invalid_status' ), 400 );
+			}
 			foreach ( $ids as $id ) {
 				$order = wc_get_order( $id );
 				if ( $order ) {

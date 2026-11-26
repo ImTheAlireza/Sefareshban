@@ -312,6 +312,15 @@ function sfog_persian_phone() {
 	return $phone;
 }
 
+
+function sfog_fake_email( $first = '', $last = '' ) {
+	$latin_first = array( 'ali', 'mohammad', 'mehdi', 'reza', 'hossein', 'amir', 'sara', 'zahra', 'maryam', 'negar', 'elham', 'fatemeh', 'niloufar', 'parisa', 'arash', 'sina', 'kamran', 'behnaz', 'shida', 'hamid' );
+	$latin_last  = array( 'ahmadi', 'mohammadi', 'rezaei', 'hosseini', 'karimi', 'sadeghi', 'mousavi', 'niknam', 'kazemi', 'sharifi', 'fathi', 'yasemi', 'dehghan', 'abedi', 'bayat', 'moradi', 'jafari', 'ghasemi', 'hashemi', 'akbari' );
+	$f = $latin_first[ array_rand( $latin_first ) ];
+	$l = $latin_last[ array_rand( $latin_last ) ];
+	$n = wp_rand( 10, 999 );
+	return $f . '.' . $l . $n . '@example.com';
+}
 function sfog_create_fake_order() {
 	if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_create_order' ) ) {
 		return false;
@@ -325,7 +334,7 @@ function sfog_create_fake_order() {
 	$payment = sfog_random( $data['payments'] );
 	$status  = sfog_random( $data['statuses'] );
 
-	$email    = 'fake_' . sanitize_title( $first . '_' . $last ) . wp_rand( 10, 999 ) . '@example.test';
+	$email    = sfog_fake_email( $first, $last );
 	$phone    = sfog_persian_phone();
 	$address1 = $street . '، کوچه ' . wp_rand( 1, 30 ) . '، پلاک ' . wp_rand( 1, 150 );
 	$postcode = (string) wp_rand( 1000000000, 9999999999 );

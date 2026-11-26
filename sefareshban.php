@@ -3,7 +3,7 @@
  * Plugin Name:       سفارش‌بان - مدیریت سفارشات ووکامرس
  * Plugin URI:        https://github.com/ImTheAlireza/Sefareshban
  * Description:       رابط کاربری مدرن برای مدیریت سفارشات ووکامرس با صفحه اختصاصی جایگزین صفحه پیش‌فرض سفارشات.
- * Version:           1.0.0
+ * Version:           1.2.0
  * Author:            Sefareshban
  * Text Domain:       sefareshban
  * Domain Path:       /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SEFARESHBAN_VERSION', '1.0.0' );
+define( 'SEFARESHBAN_VERSION', '1.2.0' );
 define( 'SEFARESHBAN_FILE', __FILE__ );
 define( 'SEFARESHBAN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEFARESHBAN_URL', plugin_dir_url( __FILE__ ) );

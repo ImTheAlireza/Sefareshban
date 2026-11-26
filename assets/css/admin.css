@@ -1,14 +1,15 @@
 
 /* WP admin overrides for Sefareshban page */
-body.sefareshban-admin-page #wpcontent{padding-left:0 !important;padding-right:0 !important}
-body.sefareshban-admin-page #wpbody-content{padding-bottom:0 !important;overflow:hidden !important}
-body.sefareshban-admin-page #wpbody{overflow:hidden !important}
+body.sefareshban-admin-page{overflow:hidden !important}
+body.sefareshban-admin-page #wpcontent{padding-left:0 !important;padding-right:0 !important;overflow:hidden !important}
+body.sefareshban-admin-page #wpbody-content{padding-bottom:0 !important;overflow:hidden !important;height:calc(100vh - var(--wp-admin--admin-bar--height,32px)) !important}
+body.sefareshban-admin-page #wpbody{overflow:hidden !important;height:calc(100vh - var(--wp-admin--admin-bar--height,32px)) !important}
+body.sefareshban-admin-page #wpwrap{overflow:hidden !important}
 body.sefareshban-admin-page #wpfooter{display:none !important}
 body.sefareshban-admin-page .update-nag,
 body.sefareshban-admin-page .notice,
 body.sefareshban-admin-page .error,
 body.sefareshban-admin-page .updated{display:none !important}
-body.sefareshban-admin-page #wpwrap{overflow:hidden}
 .sefareshban-wrap{margin:0 !important;height:calc(100vh - var(--wp-admin--admin-bar--height,32px));overflow:hidden}
 .sefareshban-root{
   --sb-font:'Vazirmatn','Segoe UI',Tahoma,system-ui,sans-serif;
@@ -67,7 +68,7 @@ body.sefareshban-admin-page #wpwrap{overflow:hidden}
   --r-frame:24px; --r-card:18px; --r-ctl:12px; --r-pill:999px;
   --ring:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
 }
-.sefareshban-root[data-theme="dark"]{
+.sefareshban-root[data-theme="dark"]{color-scheme:dark;
   --page:#08080a;
   --surface:#1b1a20;
   --surface-2:#111014;
@@ -802,3 +803,27 @@ tr:hover .dots{color:var(--muted)}
 .app-section .pagehead{margin-bottom:12px}
 #section-reports .kpis .kpi-chart{display:none}
 #section-reports .kpis .kpi-main{margin-top:8px}
+
+/* Dark mode form controls */
+.sefareshban-root[data-theme="dark"] select,
+.sefareshban-root[data-theme="dark"] option,
+.sefareshban-root[data-theme="dark"] input,
+.sefareshban-root[data-theme="dark"] textarea{
+  background-color:var(--surface);
+  color:var(--ink);
+  border-color:var(--border);
+}
+.sefareshban-root[data-theme="dark"] select option{background:#1b1a20;color:#f5f3f7;}
+.sefareshban-root[data-theme="dark"] .select select{background:var(--surface);color:var(--ink);}
+
+.sefareshban-root .pagehead h1,
+.sefareshban-root .sec-head h2,
+.sefareshban-root .nav a span,
+.sefareshban-root .brand-txt b{letter-spacing:-.2px}
+.sefareshban-root[data-theme="dark"] .pagehead h1,
+.sefareshban-root[data-theme="dark"] .sec-head h2,
+.sefareshban-root[data-theme="dark"] .brand-txt b,
+.sefareshban-root[data-theme="dark"] .nav a span{color:var(--ink);font-weight:700}
+.sefareshban-root[data-theme="dark"] .nav a{color:#b8b2c2}
+.sefareshban-root[data-theme="dark"] .nav a:hover,
+.sefareshban-root[data-theme="dark"] .nav a[aria-current="page"]{color:var(--ink)}

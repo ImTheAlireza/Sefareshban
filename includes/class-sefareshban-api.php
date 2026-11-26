@@ -25,6 +25,8 @@ class Sefareshban_API {
 			'sefareshban_export_csv',
 			'sefareshban_get_customers',
 			'sefareshban_get_products',
+			'sefareshban_get_settings',
+			'sefareshban_save_settings',
 		);
 		foreach ( $actions as $action ) {
 			add_action( 'wp_ajax_' . $action, array( $this, $action ) );
@@ -654,5 +656,36 @@ class Sefareshban_API {
 			);
 		}
 		wp_send_json_success( array( 'rows' => $rows ) );
+	}
+
+	public function sefareshban_get_settings() {
+		$this->verify();
+		$defaults = array(
+			'per_page'     => 8,
+			'auto_refresh' => 0,
+			'compact'      => 0,
+		);
+		$opts = get_option( 'sefareshban_settings', array() );
+		if ( ! is_array( $opts ) ) $opts = array();
+		$opts = wp_parse_args( $opts, $defaults );
+		$opts['per_page'] = in_array( (int) $opts['per_page'], array(8,12,20), true ) ? (int) $opts['per_page'] : 8;
+		$opts['auto_refresh'] = ! empty( $opts['auto_refresh'] ) ? 1 : 0;
+		$opts['compact'] = ! empty( $opts['compact'] ) ? 1 : 0;
+		wp_send_json_success( array( 'settings' => $opts ) );
+	}
+
+	public function sefareshban_save_settings() {
+		$this->verify();
+		$per_page = (int) ( $_POST['per_page'] ?? 8 );
+		if ( ! in_array( $per_page, array(8,12,20), true ) ) $per_page = 8;
+		$auto_refresh = ! empty( $_POST['auto_refresh'] ) && $_POST['auto_refresh'] !== '0' ? 1 : 0;
+		$compact = ! empty( $_POST['compact'] ) && $_POST['compact'] !== '0' ? 1 : 0;
+		$opts = array(
+			'per_page'     => $per_page,
+			'auto_refresh' => $auto_refresh,
+			'compact'      => $compact,
+		);
+		update_option( 'sefareshban_settings', $opts );
+		wp_send_json_success( array( 'settings' => $opts ) );
 	}
 }

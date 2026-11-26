@@ -288,6 +288,15 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
 
       <section id="section-products" class="app-section">
         <div class="pagehead"><div><h1>محصولات</h1><p>محصولات فروشگاه</p></div></div>
+        <div class="sec-head" style="margin-bottom:10px">
+          <div></div>
+          <search class="sec-tools" aria-label="جست‌وجوی محصولات">
+            <label class="search" for="productSearch">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+              <input id="productSearch" type="search" placeholder="جست‌وجوی نام، قیمت یا SKU…" autocomplete="off">
+            </label>
+          </search>
+        </div>
         <section class="card">
           <div class="table-scroll">
             <table>
@@ -313,10 +322,37 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
 
       <section id="section-settings" class="app-section">
         <div class="pagehead"><div><h1>تنظیمات</h1><p>تنظیمات افزونه سفارش‌بان</p></div></div>
-        <section class="card"><div style="padding:20px;display:flex;flex-direction:column;gap:14px;max-width:720px">
-          <div><b style="display:block;margin-bottom:4px">درباره افزونه</b><span class="muted">سفارش‌بان - رابط مدیریت سفارشات ووکامرس. نسخه <?php echo esc_html( SEFARESHBAN_VERSION ); ?></span></div>
-          <div><b style="display:block;margin-bottom:4px">سازگاری</b><span class="muted">سازگار با HPOS ووکامرس و حالت Legacy.</span></div>
-          <div><b style="display:block;margin-bottom:4px">میانبر</b><span class="muted">برای دسترسی به صفحه بومی سفارشات ووکامرس، پارامتر <code>sefareshban_native=1</code> را به URL اضافه کنید.</span></div>
+        <section class="card"><div style="padding:20px;max-width:760px">
+          <form id="sbSettingsForm" style="display:flex;flex-direction:column;gap:18px">
+            <div>
+              <label style="display:block;font-weight:600;margin-bottom:6px">تعداد پیش‌فرض سفارش در هر صفحه</label>
+              <select id="setPerPage" style="height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink);min-width:180px">
+                <option value="8">۸</option>
+                <option value="12">۱۲</option>
+                <option value="20">۲۰</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:600">
+                <input type="checkbox" id="setAutoRefresh"> رفرش خودکار لیست سفارش‌ها
+              </label>
+              <div class="muted" style="margin-top:4px">در صورت فعال بودن، لیست سفارش‌ها هر ۶۰ ثانیه به‌روز می‌شود.</div>
+            </div>
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:600">
+                <input type="checkbox" id="setCompact"> حالت فشرده جدول به‌صورت پیش‌فرض
+              </label>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button type="submit" class="btn primary">ذخیره تنظیمات</button>
+              <span id="sbSettingsMsg" class="muted"></span>
+            </div>
+          </form>
+          <hr style="border:0;border-top:1px solid var(--border-soft);margin:20px 0">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><b style="display:block;margin-bottom:4px">درباره افزونه</b><span class="muted">سفارش‌بان - رابط مدیریت سفارشات ووکامرس. نسخه <?php echo esc_html( SEFARESHBAN_VERSION ); ?></span></div>
+            <div><b style="display:block;margin-bottom:4px">سازگاری</b><span class="muted">سازگار با HPOS ووکامرس و حالت Legacy.</span></div>
+          </div>
         </div></section>
       </section>
 
@@ -349,6 +385,10 @@ $user_initial = $user_name ? mb_substr( $user_name, 0, 1 ) : 'م';
 <!-- drawer -->
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"></aside>
+
+<!-- product modal -->
+<div class="scrim" id="productScrim"></div>
+<aside class="drawer" id="productDrawer" role="dialog" aria-modal="true" aria-labelledby="productDrawerTitle"></aside>
 
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>

@@ -56,6 +56,8 @@
     statusCounts: { all: 0 },
     loading: false,
     stats: null,
+    products: [],
+    productQuery: '',
   };
 
   const TABS = [
@@ -882,23 +884,80 @@ function renderKpiCharts(){
     } catch(e) { console.error(e); if (body) body.innerHTML = '<tr><td colspan="6" style="padding:20px;color:var(--danger)">خطا در دریافت مشتریان</td></tr>'; }
   }
 
+  function renderProducts() {
+    const body = $('#productsBody');
+    if (!body) return;
+    const q = (state.productQuery || '').toLowerCase().trim();
+    let rows = state.products || [];
+    if (q) {
+      rows = rows.filter(p => {
+        const name = (p.name||'').toLowerCase();
+        const sku = (p.sku||'').toLowerCase();
+        const price = String(Math.round(p.price||0));
+        const priceFa = fa(Math.round(p.price||0));
+        return name.includes(q) || sku.includes(q) || price.includes(q) || priceFa.includes(q);
+      });
+    }
+    if (!rows.length) { body.innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">محصولی یافت نشد.</td></tr>'; return; }
+    body.innerHTML = rows.map(p => `
+      <tr data-product-id="${p.id}" style="cursor:pointer">
+        <td><div class="cust"><b>${esc(p.name||'—')}</b><span>${esc(p.sku||'')}</span></div></td>
+        <td class="num" style="font-weight:600">${fa(Math.round(p.price||0))} <small style="color:var(--muted);font-weight:400">${esc(i18n.toman||'تومان')}</small></td>
+        <td class="num">${p.stock === null ? '—' : fa(p.stock)}</td>
+        <td><span class="badge" data-status="${p.status==='publish'?'completed':'onhold'}">${p.status==='publish'?'منتشر شده':'پیش‌نویس'}</span></td>
+        <td class="num">${fa(p.total_sales||0)}</td>
+      </tr>`).join('');
+  }
+
   async function loadProducts() {
     const body = $('#productsBody');
     if (body) body.innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">در حال بارگذاری…</td></tr>';
     try {
       const data = await api('sefareshban_get_products', {});
       productsLoaded = true;
-      const rows = data.rows || [];
-      if (!rows.length) { body.innerHTML = '<tr><td colspan="5" class="muted" style="padding:20px">محصولی یافت نشد.</td></tr>'; return; }
-      body.innerHTML = rows.map(p => `
-        <tr>
-          <td><div class="cust"><b>${esc(p.name||'—')}</b><span>${esc(p.sku||'')}</span></div></td>
-          <td class="num" style="font-weight:600">${fa(Math.round(p.price||0))} <small style="color:var(--muted);font-weight:400">${esc(i18n.toman||'تومان')}</small></td>
-          <td class="num">${p.stock === null ? '—' : fa(p.stock)}</td>
-          <td><span class="badge" data-status="${p.status==='publish'?'completed':'onhold'}">${p.status==='publish'?'منتشر شده':'پیش‌نویس'}</span></td>
-          <td class="num">${fa(p.total_sales||0)}</td>
-        </tr>`).join('');
+      state.products = data.rows || [];
+      renderProducts();
     } catch(e) { console.error(e); if (body) body.innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--danger)">خطا در دریافت محصولات</td></tr>'; }
+  }
+
+  function openProductModal(id) {
+    const p = (state.products||[]).find(x => +x.id === +id);
+    if (!p) return;
+    const drawer = $('#productDrawer');
+    drawer.innerHTML = `
+      <div class="d-head">
+        <div>
+          <div class="t1" id="productDrawerTitle">${esc(p.name||'محصول')}</div>
+          <div class="t2 num">${p.sku ? 'SKU: ' + esc(p.sku) : 'بدون SKU'}</div>
+        </div>
+        <button class="circle" data-close-product aria-label="بستن">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="d-body">
+        <section class="d-sec" style="padding-top:2px">
+          <div class="d-label">وضعیت</div>
+          <span class="badge" data-status="${p.status==='publish'?'completed':'onhold'}">${p.status==='publish'?'منتشر شده':'پیش‌نویس'}</span>
+        </section>
+        <section class="d-sec">
+          <div class="d-label">اطلاعات محصول</div>
+          <div class="totals">
+            <div class="r"><span>قیمت</span><b class="num">${fa(Math.round(p.price||0))} ${esc(i18n.toman||'تومان')}</b></div>
+            <div class="r"><span>موجودی</span><b class="num">${p.stock === null ? 'نامحدود/مدیریت نمی‌شود' : fa(p.stock)}</b></div>
+            <div class="r"><span>تعداد فروش</span><b class="num">${fa(p.total_sales||0)}</b></div>
+            <div class="r"><span>شناسه</span><b class="num">#${fa(p.id)}</b></div>
+          </div>
+        </section>
+      </div>
+      <div class="d-foot">
+        <button class="btn" data-close-product>بستن</button>
+      </div>`;
+    drawer.classList.add('open');
+    $('#productScrim').classList.add('show');
+  }
+  function closeProductModal() {
+    $('#productDrawer')?.classList.remove('open');
+    $('#productScrim')?.classList.remove('show');
   }
 
   async function loadReports() {
@@ -989,4 +1048,75 @@ function renderKpiCharts(){
     }
   }
 
+
+
+  /* ================= products ================= */
+  const productSearch = $('#productSearch');
+  if (productSearch) productSearch.addEventListener('input', e => {
+    state.productQuery = e.target.value || '';
+    renderProducts();
+  });
+  const productsBody = $('#productsBody');
+  if (productsBody) productsBody.addEventListener('click', e => {
+    const row = e.target.closest('tr[data-product-id]');
+    if (row) openProductModal(row.dataset.productId);
+  });
+  $('#productScrim')?.addEventListener('click', closeProductModal);
+  $('#productDrawer')?.addEventListener('click', e => {
+    if (e.target.closest('[data-close-product]')) closeProductModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeProductModal();
+  }, { passive: true });
+  /* ================= settings ================= */
+  let autoRefreshTimer = null;
+  function applySettings(s) {
+    if (!s) return;
+    if (s.per_page && [8,12,20].includes(+s.per_page)) {
+      state.per = +s.per_page;
+      const pp = $('#perPage'); if (pp) pp.value = String(state.per);
+    }
+    if (s.compact) {
+      document.getElementById('sefareshbanRoot').dataset.density = 'compact';
+      $('#densityBtn')?.setAttribute('aria-pressed','true');
+    }
+    if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+    if (s.auto_refresh) {
+      autoRefreshTimer = setInterval(() => { if (state.openId === null) fetchOrders(); }, 60000);
+    }
+    const sp = $('#setPerPage'); if (sp) sp.value = String(s.per_page || 8);
+    const ar = $('#setAutoRefresh'); if (ar) ar.checked = !!s.auto_refresh;
+    const sc = $('#setCompact'); if (sc) sc.checked = !!s.compact;
+  }
+
+  async function loadSettings() {
+    try {
+      const data = await api('sefareshban_get_settings', {});
+      applySettings(data.settings || {});
+    } catch(e) { console.error(e); }
+  }
+
+  const settingsForm = $('#sbSettingsForm');
+  if (settingsForm) settingsForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = $('#sbSettingsMsg');
+    if (msg) msg.textContent = 'در حال ذخیره...';
+    try {
+      const payload = {
+        per_page: $('#setPerPage')?.value || 8,
+        auto_refresh: $('#setAutoRefresh')?.checked ? 1 : 0,
+        compact: $('#setCompact')?.checked ? 1 : 0,
+      };
+      const data = await api('sefareshban_save_settings', payload);
+      applySettings(data.settings || payload);
+      if (msg) msg.textContent = 'ذخیره شد ✓';
+      toast('تنظیمات ذخیره شد');
+      fetchOrders();
+    } catch(err) {
+      console.error(err);
+      if (msg) msg.textContent = 'خطا در ذخیره';
+    }
+  });
+
+  loadSettings();
 })();
